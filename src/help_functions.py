@@ -2,6 +2,7 @@ import open3d as o3d
 import numpy as np
 import copy
 from param import *
+import pickle as pkl
 
 def draw_registration_result(source, target, transformation):
     source_temp = copy.deepcopy(source)
@@ -24,13 +25,13 @@ def preprocess_point_cloud(pcd, voxel_size):
     radius_normal = voxel_size * 2
     print(":: Estimate normal with search radius %.3f." % radius_normal)
     pcd_down.estimate_normals(
-        o3d.geometry.KDTreeSearchParamHybrid(radius=radius_normal, max_nn=30))
+        o3d.geometry.KDTreeSearchParamHybrid(radius=radius_normal, max_nn=230))
 
     radius_feature = voxel_size * 5
     print(":: Compute FPFH feature with search radius %.3f." % radius_feature)
     pcd_fpfh = o3d.pipelines.registration.compute_fpfh_feature(
         pcd_down,
-        o3d.geometry.KDTreeSearchParamHybrid(radius=radius_feature, max_nn=30))
+        o3d.geometry.KDTreeSearchParamHybrid(radius=radius_feature, max_nn=230))
     return pcd_down, pcd_fpfh
 
 
@@ -48,11 +49,11 @@ def prepare_dataset(voxel_size):
     target_down, target_fpfh = preprocess_point_cloud(target, voxel_size)
 
     processed_source, outlier_index = source.remove_radius_outlier(
-                                              nb_points=35,
+                                              nb_points=25,
                                               radius=0.5)
 
     processed_target, outlier_index = target.remove_radius_outlier(
-                                              nb_points=35,
+                                              nb_points=25,
                                               radius=0.5)
 
     p_target_down, p_target_fpfh = preprocess_point_cloud(processed_source, voxel_size)
@@ -64,21 +65,34 @@ def prepare_dataset(voxel_size):
 
 
 def execute_global_registration(source_down, target_down, source_fpfh,
-                                target_fpfh, voxel_size):
+                                target_fpfh, voxel_size, tranform, s = True):
     distance_threshold = voxel_size * 1.5
     print(":: RANSAC registration on downsampled point clouds.")
     print("   Since the downsampling voxel size is %.3f," % voxel_size)
     print("   we use a liberal distance threshold %.3f." % distance_threshold)
-    result = o3d.pipelines.registration.registration_ransac_based_on_feature_matching(
-        source_down, target_down, source_fpfh, target_fpfh, True,
-        distance_threshold,
-        o3d.pipelines.registration.TransformationEstimationPointToPoint(False),
-        3, [
-            o3d.pipelines.registration.CorrespondenceCheckerBasedOnEdgeLength(
-                0.01),
-            o3d.pipelines.registration.CorrespondenceCheckerBasedOnDistance(
-                distance_threshold)
-        ], o3d.pipelines.registration.RANSACConvergenceCriteria(1000000,0.999))
+    if (s == True):
+        result = o3d.pipelines.registration.registration_ransac_based_on_feature_matching(
+            source_down, target_down, source_fpfh, target_fpfh, True,
+            distance_threshold,
+            o3d.pipelines.registration.TransformationEstimationPointToPoint(False),
+            3, [
+                o3d.pipelines.registration.CorrespondenceCheckerBasedOnEdgeLength(
+                    0.95),
+                o3d.pipelines.registration.CorrespondenceCheckerBasedOnDistance(
+                    distance_threshold)
+            ], o3d.pipelines.registration.RANSACConvergenceCriteria(10000000,0.999))
+    else:
+        result = o3d.pipelines.registration.registration_ransac_based_on_feature_matching(
+            source_down, target_down, source_fpfh, target_fpfh, True,
+            distance_threshold,
+            tranform,
+            3, [
+                o3d.pipelines.registration.CorrespondenceCheckerBasedOnEdgeLength(
+                    95),
+                o3d.pipelines.registration.CorrespondenceCheckerBasedOnDistance(
+                    distance_threshold)
+            ], o3d.pipelines.registration.RANSACConvergenceCriteria(100000,0.999))
+
     return result
 
 
@@ -101,18 +115,56 @@ def refine_registration(source, target, source_fpfh, target_fpfh, voxel_size, re
         o3d.pipelines.registration.TransformationEstimationPointToPlane())
     return result
 
+def save_transformation(source, target, transformation):
+    with open('../stiched/temp' + s[0] + '_' + p[0] + '.pkl','wb') as f:
+        pkl.dump(transformation, f)
 
-def save_registration_result(source, target, transformation,filename):
+    #test load
+    with open('../stiched/temp' + s[0] + '_' + p[0] + '.pkl','rb') as f:
+        x = pkl.load(f)
+        print(x)
+
+
+    # save combined pointcloud as pcd file
+    save_registration_result(source, target, x,'../stiched/stitch_'+ s[0] + '_' + p[0] + '.pcd' )
+
+
+
+def save_registration_result(source, target, transformation,
+                             title,
+                             save_result = True,
+                             visualize_result = False):
+    
+    filename = title
+    
+    # apply the chosen transformation to source and target
     source_temp = copy.deepcopy(source)
     target_temp = copy.deepcopy(target)
     source_temp.paint_uniform_color([1, 0.706, 0])
     target_temp.paint_uniform_color([0, 0.651, 0.929])
     source_temp.transform(transformation)
+    
+    # combine them and create the newpoint cloud
     newpointcloud = source_temp + target_temp
+    newpointcloud.paint_uniform_color([0,0.5,0.1])
+    
+    #save
+    if save_result == True: 
+        o3d.io.write_point_cloud(filename, newpointcloud)
+    
+    #visualize
+    if visualize_result == True:
+        o3d.visualization.draw_geometries([newpointcloud],
+                                          width=1000, height=800,
+                                         window_name='newpointcloud-')
+    return newpointcloud
 
-    pcd = o3d.io.read_point_cloud(source_path)
-    
-    o3d.io.write_point_cloud(filename, pcd)
-    
-    
-    o3d.visualization.draw_geometries([newpointcloud])
+
+def display_inlier_outlier(cloud, ind):
+    inlier_cloud = cloud.select_down_sample(ind)
+    outlier_cloud = cloud.select_down_sample(ind, invert=True)
+
+    print("Showing outliers (red) and inliers (gray): ")
+    outlier_cloud.paint_uniform_color([1, 0, 0])
+    inlier_cloud.paint_uniform_color([0.8, 0.8, 0.8])
+    o3d.visualization.draw_geometries([inlier_cloud, outlier_cloud])
