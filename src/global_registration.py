@@ -34,7 +34,6 @@ result_icp = refine_registration(source, target, source_fpfh, target_fpfh, voxel
 draw_registration_result(source, target, result_icp.transformation)
 
 
-
 save_transformation(source, target, result_icp.transformation, False)
 
 
