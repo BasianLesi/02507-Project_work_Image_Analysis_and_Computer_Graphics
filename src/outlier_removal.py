@@ -7,7 +7,8 @@ from matplotlib import pyplot as plt
 # ===========Not Working yet======================
 
 # source_path = "../stiched/stitch_99_98_97.pcd"
-source_path = "../data/plyfolder/points0.ply"
+source_path = "../stiched/stitch_99_97.pcd"
+# source_path = "../data/plyfolder/points0.ply"
 
 source = o3d.io.read_point_cloud(source_path)
 
