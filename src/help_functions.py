@@ -36,10 +36,8 @@ def preprocess_point_cloud(pcd, voxel_size):
 
 
 
-def prepare_dataset(voxel_size):
+def prepare_dataset(voxel_size, source, target):
     print(":: Load two point clouds and disturb initial pose.")
-    source = o3d.io.read_point_cloud(source_path)
-    target = o3d.io.read_point_cloud(target_path)
     trans_init = np.asarray([[0.0, 0.0, 1.0, 0.0], [1.0, 0.0, 0.0, 0.0],
                              [0.0, 1.0, 0.0, 0.0], [0.0, 0.0, 0.0, 1.0]])
     source.transform(trans_init)
@@ -56,11 +54,7 @@ def prepare_dataset(voxel_size):
                                               nb_points=25,
                                               radius=0.5)
 
-    p_target_down, p_target_fpfh = preprocess_point_cloud(processed_source, voxel_size)
-
-    p_source_down, p_source_fpfh = preprocess_point_cloud(processed_target, voxel_size)
-
-    return source, target, source_down, target_down, source_fpfh, target_fpfh, processed_source, processed_target, trans_init, p_source_down, p_target_down, p_source_fpfh,  p_target_fpfh
+    return source_down, target_down, source_fpfh, target_fpfh, processed_source, processed_target, trans_init
 
 
 
@@ -115,18 +109,18 @@ def refine_registration(source, target, source_fpfh, target_fpfh, voxel_size, re
         o3d.pipelines.registration.TransformationEstimationPointToPlane())
     return result
 
-def save_transformation(source, target, transformation):
-    with open('../stiched/temp' + s[0] + '_' + p[0] + '.pkl','wb') as f:
+def save_transformation(source, target, transformation, name = "", save = False):
+    with open('../stiched/temp'+ name + '.pkl','wb') as f:
         pkl.dump(transformation, f)
 
     #test load
-    with open('../stiched/temp' + s[0] + '_' + p[0] + '.pkl','rb') as f:
+    with open('../stiched/temp' + name + '.pkl','rb') as f:
         x = pkl.load(f)
-        print(x)
-
+        # print(x)
 
     # save combined pointcloud as pcd file
-    save_registration_result(source, target, x,'../stiched/stitch_'+ s[0] + '_' + p[0] + '.pcd' )
+    if(save):
+       return save_registration_result(source, target, x,'../stiched/stitch_'+ name + '.pcd' )
 
 
 
