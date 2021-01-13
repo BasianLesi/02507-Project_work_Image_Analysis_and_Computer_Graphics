@@ -13,5 +13,8 @@ import re
 # s = regex.findall(source_path)
 # p = regex.findall(target_path)
 
+source_path = "../data/plyfolder/external/points0.ply"
+target_path = "../data/plyfolder/external/points01.ply"
+
 voxel_size = 0.2
 threshold = 0.02

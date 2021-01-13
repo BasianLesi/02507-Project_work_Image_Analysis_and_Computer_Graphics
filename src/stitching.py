@@ -6,6 +6,8 @@ from help_functions import *
 import pickle as pkl
 import os
 import re
+import time
+
 
 
 def global_and_icp_registration(source, target, title = "temp"):
@@ -36,6 +38,8 @@ def print_point_cloud(filename, title):
     o3d.visualization.draw_geometries([source], width=1000, height=800, window_name='Open3D-'+str(title))
 
 
+t0= time.clock()
+
 external_path = "../data/plyfolder/external/"
 internal_path = "../data/plyfolder/internal/"
 upper_path = "../data/plyfolder/upper/"
@@ -60,7 +64,7 @@ processed_source, outlier_index = source.remove_radius_outlier( nb_points=25, ra
 filename = "../stiched/external.pcd"
 o3d.io.write_point_cloud(filename, processed_source)
 
-print_point_cloud(filename, "external")
+# print_point_cloud(filename, "external")
 
 
 # ========================== Stitching Internal Side =======================================
@@ -78,7 +82,7 @@ processed_source, outlier_index = source.remove_radius_outlier( nb_points=25, ra
 filename = "../stiched/internal.pcd"
 o3d.io.write_point_cloud(filename, processed_source)
 
-print_point_cloud(filename, "internal")
+# print_point_cloud(filename, "internal")
 
 
 # ========================== Stitching Upper Side =======================================
@@ -97,7 +101,7 @@ processed_source, outlier_index = source.remove_radius_outlier( nb_points=25, ra
 filename = "../stiched/upper.pcd"
 o3d.io.write_point_cloud(filename, processed_source)
 
-print_point_cloud(filename, "upper")
+# print_point_cloud(filename, "upper")
 
 
 # ========================== Stitching the 3 Sides =======================================
@@ -115,5 +119,9 @@ processed_final, outlier_index = final.remove_radius_outlier( nb_points=50, radi
 filename = "../stiched/final.pcd"
 o3d.io.write_point_cloud(filename, processed_final)
 
-print_point_cloud(filename, "final")
+# print_point_cloud(filename, "final")
 
+t1 = time.clock() - t0
+print("Time elapsed: ", t1, "seconds") # CPU seconds elapsed (floating point)
+
+print_point_cloud(filename, "final")
