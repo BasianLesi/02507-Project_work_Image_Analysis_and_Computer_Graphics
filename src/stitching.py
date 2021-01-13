@@ -7,6 +7,7 @@ import pickle as pkl
 import os
 import re
 import time
+from clustering import *
 
 
 
@@ -119,9 +120,14 @@ processed_final, outlier_index = final.remove_radius_outlier( nb_points=50, radi
 filename = "../stiched/final.pcd"
 o3d.io.write_point_cloud(filename, processed_final)
 
-# print_point_cloud(filename, "final")
+
+cluster_pcd = clustering(processed_final)
 
 t1 = time.clock() - t0
 print("Time elapsed: ", t1, "seconds") # CPU seconds elapsed (floating point)
 
-print_point_cloud(filename, "final")
+custom_draw_geometry(cluster_pcd)
+
+filename = "../stiched/final_clustered.pcd"
+o3d.io.write_point_cloud(filename, cluster_pcd)
+
