@@ -16,7 +16,7 @@ source_path = "../stiched/final_clustered.pcd"
 
 source = o3d.io.read_point_cloud(source_path)
 
-source.paint_uniform_color([0.2, 0.2, 0.8])
+source.paint_uniform_color([0.2, 0.7, 0.2])
 
 # target = o3d.io.read_point_cloud(target_path)
 

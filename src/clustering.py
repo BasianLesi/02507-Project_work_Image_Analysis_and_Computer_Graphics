@@ -9,6 +9,8 @@ import pickle as pkl
 from help_functions import *
 import statistics 
 from statistics import mode
+from skspatial.objects import Points, Plane
+from skspatial.plotting import plot_3d
 
 
 def create_title(mytitle, mytuples):
@@ -94,11 +96,204 @@ def clustering( original_cloud,
     return biggest_cluster_cloud
 
 
-# filename = "../stiched/final.pcd"
-# pcd =  o3d.io.read_point_cloud(filename)
 
-# custom_draw_geometry(pcd)
+def is_point_in_plane(point = [0,0,0],
+                      plane_parameters = [0,0,0,0],
+                      neg_margin = 0,
+                      pos_margin = 0):
 
-# cluster_pcd = clustering(pcd)
+    d_point = sum([point[i]*plane_parameters[i] for i in range(3)])
+    
+    #print (d)
+    #print (d_point)
+    
+    if d - neg_margin  <= d_point <= d+pos_margin:
+        return True
+    else:
+        return False
 
-# custom_draw_geometry(cluster_pcd)
+
+
+def custom_remove_plane(original_cloud,
+                        nneg_margin = 0.2,
+                        ppos_margin = 0.01,
+                        
+                        #visualization parameters
+                        mytitle = "custom_remove_planes", mytuples = None, 
+                        params = None, #camera parameters,json file (P)
+                        fov_step  = None, 
+                        configuration_file = None, #object properties ,json file (O)
+                        rotate = False,
+                        
+                        #statements
+                        print_statements = True,
+                        visualization_on = False,
+                       ):
+    """
+    cloud = point cloud
+    """
+    cloud = copy.deepcopy(original_cloud)
+    
+    ## 
+    mytuples = list(zip(("pos_margin","neg_margin"),(ppos_margin,nneg_margin)))
+    
+    # initialize empty list
+    selected_points = []
+      
+    # print instructions
+    if print_statements == True:
+        print("")
+        print("1) Please pick at least 3 points using [shift + left click]")
+        print("   Press [shift + right click] to undo point picking")
+        print("2) After picking points, press 'Q' to close the window")
+        
+    # we need 3 points
+    while len(selected_points) != 3: 
+        
+        # selected points
+        # in theory one can select any number of points, but we want three to find the plane
+        selected_points = pick_points(cloud)
+    
+    # access the coordinates of the points
+    # we want only 3 points to find the plane
+    coordinates_points= [list(np.asarray(cloud.points)[selected_points[i]]) for i in range(3)]
+    
+    
+    # translate in scikit language the newly found coordinates
+    points = Points(coordinates_points)
+    #identify the plane through the points
+    plane = Plane.best_fit(points)
+
+    # for each point in the point cloud, 
+    # if it lies on the plane identified by the manually selected 3 points, it gets excluded
+    all_points = np.asarray(cloud.points)
+    all_indexes = list(range(len(all_points)))
+    all_list_points = [list(e) for i, e in enumerate(all_points[:])]
+    inliers = [list(all_points[i]) for i in range(len(all_points)) if is_point_in_plane(all_points[i], 
+                                                                                      plane.normal,
+                                                                                      neg_margin = nneg_margin,
+                                                                                      pos_margin = ppos_margin)]
+    
+                                                                                            
+    if print_statements == True:
+        print ("")
+        print ("plane point: ",plane.point)
+        print ("normal to the plane: ",plane.normal) 
+        print ("")
+        print ("total number of points: ",len(all_points))                                                                                 
+        print ("number excluded points : ",len(inliers))
+        print ("with pos_margin= %s ; neg_margin= %s" %(ppos_margin,nneg_margin))
+        print ("")
+        print ("calculating indexes (might take a while...)")
+    
+    ## find the indexes of the outliers
+    #inliers_idx = [i for i, e in enumerate(all_list_points) if e in inliers] #slower
+    inliers_idx = [all_list_points.index(e) for e in inliers] #faster
+    
+    # include the invert of the outliers indexes
+    temp_cloud= copy.deepcopy(cloud)
+    cloud_new = temp_cloud.select_by_index(inliers_idx, invert=True)
+    
+    #visualize eventually
+    if visualization_on == True:
+        
+        continue_statement = "y"
+        
+        while continue_statement == "y":
+            
+            mytuples,inliers_idx,update_p = update_parameters(mytuples,all_points,plane.normal,inliers_idx)
+            
+            if update_p == "y":
+                # include the invert of the outliers indexes
+                temp_cloud= copy.deepcopy(cloud)
+                cloud_new = temp_cloud.select_by_index(inliers_idx, invert=True)
+        
+            #o3d.visualization.draw_geometries([cloud_new])
+            #display_inlier_outlier(cloud, inliers_idx)
+            custom_draw_geometry_outliers(cloud_new, inliers_idx, 
+                                          mytitle = mytitle, mytuples = mytuples, 
+                                          params = params, #camera parameters,json file (P)
+                                          fov_step  = None, 
+                                          configuration_file = configuration_file, #object properties ,json file (O)
+                                          rotate = rotate)
+
+
+            print('Delete the space in red (y/n): ')
+            delete_statement = input()
+
+            print('continue finding planes (y/n): ')
+            continue_statement = input()
+            
+            
+
+        if str(delete_statement) == "y":
+            return cloud_new 
+
+        else:
+            print ("no points deleted")
+            return cloud
+
+
+def find_and_delete_planes(original_cluster_cloud, 
+                           ddistance_threshold=0.1,
+                           rransac_n=3,
+                           nnum_iterations=1000,
+                           visualize_on = True):
+    """
+    returns the point cloud cleaned of planes 
+    """
+    cluster_cloud = copy.deepcopy(original_cluster_cloud)
+    continue_statement = "y"
+    delete_statement = False
+    
+    list_explored_planes = []
+    plane_to_explore = False
+    
+    
+    while continue_statement == "y":
+    
+        while plane_to_explore == False:
+            plane_model, inliers = cluster_cloud.segment_plane(distance_threshold=ddistance_threshold,
+                                                               ransac_n=rransac_n,
+                                                               num_iterations=nnum_iterations
+                                                              )
+            [a, b, c, d] = plane_model
+            
+            # if this plane has already been checked, continue changing the parameters
+            if [a, b, c, d] in list_explored_planes:
+                rransac_n +=0.01
+                num_iterations +=1
+            
+            # mark the plane as now explored and continue
+            else: 
+                list_explored_planes.append([a, b, c, d])
+                plane_to_explore = True
+                
+                
+        print(f"Plane equation: {a:.2f}x + {b:.2f}y + {c:.2f}z + {d:.2f} = 0")
+
+        inlier_cloud = cluster_cloud.select_by_index(inliers)
+        print ("plane detected contains %s points" %len(inlier_cloud.points))
+        inlier_cloud.paint_uniform_color([1.0, 0, 0]) # points on the plane
+        temp_cluster_cloud = copy.deepcopy(cluster_cloud)
+        outlier_cloud = temp_cluster_cloud.select_by_index(inliers, invert=True)
+
+        #o3d.visualization.draw_geometries([inlier_cloud, outlier_cloud])
+
+        if visualize_on == True:
+            custom_draw_geometry(inlier_cloud+outlier_cloud, 
+                             mytitle = "biggest_cluster_cloud_and_outliers", mytuples = None,
+                             params = None, 
+                             configuration_file = None, 
+                             take_screen_shot = False,
+                             rotate = False)
+            
+        print('Delete the plane in red (y/n): ')
+        delete_statement = input()
+        if str(delete_statement) == "y":
+            cluster_cloud = outlier_cloud
+        
+        print('continue finding planes (y/n): ')
+        continue_statement = input()
+   
+    return cluster_cloud

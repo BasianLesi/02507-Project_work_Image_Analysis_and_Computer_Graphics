@@ -146,3 +146,21 @@ def custom_draw_geometry(pcd,
             vis.capture_screen_image(mytitle+'.png')
 
         vis.destroy_window()
+
+
+
+def pick_points(pcd):
+    #print("")
+    #print("1) Please pick at least three correspondences using [shift + left click]")
+    #print("   Press [shift + right click] to undo point picking")
+    #print("2) After picking points, press 'Q' to close the window")
+    vis = o3d.visualization.VisualizerWithEditing()
+    vis.create_window("select 3 points with [shift + left click]; close view with [Q]",
+                      width=1000, height=800, 
+                      left=50, top=50, 
+                      visible=True)
+    vis.add_geometry(pcd)
+    vis.run()  # user picks points
+    vis.destroy_window()
+    print("")
+    return vis.get_picked_points()

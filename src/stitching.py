@@ -131,3 +131,8 @@ custom_draw_geometry(cluster_pcd)
 filename = "../stiched/final_clustered.pcd"
 o3d.io.write_point_cloud(filename, cluster_pcd)
 
+cluster_pcd    = o3d.io.read_point_cloud("../stiched/final_clustered.pcd")
+
+# removed_plane = find_and_delete_planes(cluster_pcd)
+# custom_draw_geometry(removed_plane)
+

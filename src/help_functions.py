@@ -162,3 +162,20 @@ def display_inlier_outlier(cloud, ind):
     outlier_cloud.paint_uniform_color([1, 0, 0])
     inlier_cloud.paint_uniform_color([0.8, 0.8, 0.8])
     o3d.visualization.draw_geometries([inlier_cloud, outlier_cloud])
+
+def stl_to_pcd(filename = None):
+    #load
+    if (filename == None):
+        mesh = o3d.io.read_triangle_mesh("../data/dental.stl")
+    else:
+        mesh = o3d.io.read_triangle_mesh(filename)
+
+    mesh.compute_vertex_normals()
+
+    #from mesh to pad
+    pcd = o3d.geometry.PointCloud()
+    pcd.points = mesh.vertices
+    pcd.colors = mesh.vertex_colors
+    pcd.normals = mesh.vertex_normals
+
+    return pcd
