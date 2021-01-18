@@ -12,3 +12,24 @@ ipython_config.py
 #   git rm -r .ipynb_checkpoints/
 notebooks/ARITA_point_cloud_project_v2_0.ipynb
 notebooks/Stitching_functions.ipynb
+data/ScreenCapture_2021-01-18-16-16-14.png
+data/ScreenCapture_2021-01-18-16-15-52.png
+data/ScreenCapture_2021-01-18-15-41-53.png
+data/ScreenCapture_2021-01-18-15-26-19.png
+data/ScreenCapture_2021-01-18-14-55-02.png
+data/ScreenCapture_2021-01-18-14-47-08.png
+data/ScreenCapture_2021-01-18-13-46-24.png
+data/ScreenCapture_2021-01-18-13-29-54.png
+data/ScreenCapture_2021-01-18-12-50-52.png
+data/ScreenCapture_2021-01-18-12-29-33.png
+data/ScreenCamera_2021-01-18-16-16-14.json
+data/ScreenCamera_2021-01-18-16-15-52.json
+data/ScreenCamera_2021-01-18-15-41-53.json
+data/ScreenCamera_2021-01-18-15-26-19.json
+data/ScreenCamera_2021-01-18-14-55-02.json
+data/ScreenCamera_2021-01-18-14-47-08.json
+data/ScreenCamera_2021-01-18-13-46-24.json
+data/ScreenCamera_2021-01-18-13-29-54.json
+data/ScreenCamera_2021-01-18-12-50-52.json
+data/ScreenCamera_2021-01-18-12-29-33.json
+*.pcd
