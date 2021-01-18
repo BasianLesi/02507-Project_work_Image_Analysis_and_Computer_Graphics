@@ -5,6 +5,7 @@ from param import *
 from help_functions import *
 import time
 import math
+import matplotlib.pyplot as plt
 
 if __name__ == "__main__":
     o3d.utility.set_verbosity_level(o3d.utility.VerbosityLevel.Debug)
@@ -21,6 +22,7 @@ if __name__ == "__main__":
     result_ransac = execute_global_registration(source_down, target_down,
                                                 source_fpfh, target_fpfh,
                                                 voxel_size, trans_init)
+
 
     source.transform(result_ransac.transformation)
     target.transform(result_ransac.transformation)
@@ -54,6 +56,12 @@ if __name__ == "__main__":
         vis.update_renderer()
         time.sleep(0.1)
 
+    print("inlier_rmse = ",result_ransac.inlier_rmse)
+    print("fitness = ",result_ransac.fitness)
+
+    rmse = []
+    fitness = []
+    iteration = []
 
     for i in range(icp_iteration):
         result = o3d.pipelines.registration.registration_icp(
@@ -69,9 +77,21 @@ if __name__ == "__main__":
         vis.update_geometry(source)
         vis.poll_events()
         vis.update_renderer()
+        rmse.append(result.inlier_rmse)
+        fitness.append(result.fitness/4)
+        y = result.inlier_rmse
+        fit = result.fitness
+        iteration.append(i)
+        # plt.scatter(i, y, color="blue")
+        plt.plot(iteration, rmse, color = "red")
+        plt.plot(iteration, fitness, color = "blue")
+        plt.xlabel("iteration")
+        plt.ylabel("rmse")
+        plt.pause(0.0001)
         # draw_registration_result(source, target, result.transformation)
         if save_image:
-            vis.capture_screen_image("images/temp_%04d.jpg" % i)
+            plt.savefig("images/plot/plot_%04d.jpg" % i)
+            # vis.capture_screen_image("images/temp_%04d.jpg" % i)
     vis.destroy_window()
 
     

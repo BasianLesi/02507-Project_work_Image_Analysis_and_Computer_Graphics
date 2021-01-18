@@ -4,6 +4,7 @@ import copy
 from param import *
 import pickle as pkl
 
+
 def draw_registration_result(source, target, transformation):
     source_temp = copy.deepcopy(source)
     target_temp = copy.deepcopy(target)
@@ -64,28 +65,16 @@ def execute_global_registration(source_down, target_down, source_fpfh,
     print(":: RANSAC registration on downsampled point clouds.")
     print("   Since the downsampling voxel size is %.3f," % voxel_size)
     print("   we use a liberal distance threshold %.3f." % distance_threshold)
-    if (s == True):
-        result = o3d.pipelines.registration.registration_ransac_based_on_feature_matching(
-            source_down, target_down, source_fpfh, target_fpfh, True,
-            distance_threshold,
-            o3d.pipelines.registration.TransformationEstimationPointToPoint(False),
-            3, [
-                o3d.pipelines.registration.CorrespondenceCheckerBasedOnEdgeLength(
-                    0.95),
-                o3d.pipelines.registration.CorrespondenceCheckerBasedOnDistance(
-                    distance_threshold)
-            ], o3d.pipelines.registration.RANSACConvergenceCriteria(10000000,0.999))
-    else:
-        result = o3d.pipelines.registration.registration_ransac_based_on_feature_matching(
-            source_down, target_down, source_fpfh, target_fpfh, True,
-            distance_threshold,
-            tranform,
-            3, [
-                o3d.pipelines.registration.CorrespondenceCheckerBasedOnEdgeLength(
-                    95),
-                o3d.pipelines.registration.CorrespondenceCheckerBasedOnDistance(
-                    distance_threshold)
-            ], o3d.pipelines.registration.RANSACConvergenceCriteria(100000,0.999))
+    result = o3d.pipelines.registration.registration_ransac_based_on_feature_matching(
+        source_down, target_down, source_fpfh, target_fpfh, True,
+        distance_threshold,
+        o3d.pipelines.registration.TransformationEstimationPointToPoint(False),
+        3, [
+             o3d.pipelines.registration.CorrespondenceCheckerBasedOnEdgeLength(
+                0.95),
+            o3d.pipelines.registration.CorrespondenceCheckerBasedOnDistance(
+                distance_threshold)
+        ], o3d.pipelines.registration.RANSACConvergenceCriteria(10000000,0.999))
 
     return result
 

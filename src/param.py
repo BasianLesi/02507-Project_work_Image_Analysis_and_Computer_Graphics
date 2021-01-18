@@ -1,7 +1,7 @@
 import re
 
 
-# source_path = "../data/plyfolder/points20.ply"
+# source_path = "../data/plyfolder/points02.ply"
 # target_path = "../data/plyfolder/points0.ply"
 
 # source_path = "../stiched/stitch_99_97.pcd"
