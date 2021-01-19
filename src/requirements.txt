@@ -1,7 +1,7 @@
 numpy
 open3d
 matplotlib
-pickle
+pickle-mixin
 statistics
 scikit-spatial
 regex
