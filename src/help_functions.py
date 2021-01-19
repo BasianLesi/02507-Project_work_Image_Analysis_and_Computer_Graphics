@@ -1,9 +1,10 @@
 import open3d as o3d
 import numpy as np
 import copy
-from param import *
 import pickle as pkl
 
+voxel_size = 0.2
+threshold = 0.02
 
 def draw_registration_result(source, target, transformation):
     source_temp = copy.deepcopy(source)
@@ -60,22 +61,23 @@ def prepare_dataset(voxel_size, source, target):
 
 
 def execute_global_registration(source_down, target_down, source_fpfh,
-                                target_fpfh, voxel_size, tranform, s = True):
+                                target_fpfh, voxel_size, tranform):
     distance_threshold = voxel_size * 1.5
     print(":: RANSAC registration on downsampled point clouds.")
     print("   Since the downsampling voxel size is %.3f," % voxel_size)
     print("   we use a liberal distance threshold %.3f." % distance_threshold)
+
     result = o3d.pipelines.registration.registration_ransac_based_on_feature_matching(
         source_down, target_down, source_fpfh, target_fpfh, True,
         distance_threshold,
         o3d.pipelines.registration.TransformationEstimationPointToPoint(False),
         3, [
-             o3d.pipelines.registration.CorrespondenceCheckerBasedOnEdgeLength(
+            o3d.pipelines.registration.CorrespondenceCheckerBasedOnEdgeLength(
                 0.95),
             o3d.pipelines.registration.CorrespondenceCheckerBasedOnDistance(
                 distance_threshold)
         ], o3d.pipelines.registration.RANSACConvergenceCriteria(10000000,0.999))
-
+        
     return result
 
 
@@ -99,17 +101,17 @@ def refine_registration(source, target, source_fpfh, target_fpfh, voxel_size, re
     return result
 
 def save_transformation(source, target, transformation, name = "", save = False):
-    with open('../stiched/temp'+ name + '.pkl','wb') as f:
+    with open('../stitched/temp'+ name + '.pkl','wb') as f:
         pkl.dump(transformation, f)
 
     #test load
-    with open('../stiched/temp' + name + '.pkl','rb') as f:
+    with open('../stitched/temp' + name + '.pkl','rb') as f:
         x = pkl.load(f)
         # print(x)
 
     # save combined pointcloud as pcd file
     if(save):
-       return save_registration_result(source, target, x,'../stiched/stitch_'+ name + '.pcd' )
+       return save_registration_result(source, target, x,'../stitched/stitch_'+ name + '.pcd' )
 
 
 
@@ -151,20 +153,3 @@ def display_inlier_outlier(cloud, ind):
     outlier_cloud.paint_uniform_color([1, 0, 0])
     inlier_cloud.paint_uniform_color([0.8, 0.8, 0.8])
     o3d.visualization.draw_geometries([inlier_cloud, outlier_cloud])
-
-def stl_to_pcd(filename = None):
-    #load
-    if (filename == None):
-        mesh = o3d.io.read_triangle_mesh("../data/dental.stl")
-    else:
-        mesh = o3d.io.read_triangle_mesh(filename)
-
-    mesh.compute_vertex_normals()
-
-    #from mesh to pad
-    pcd = o3d.geometry.PointCloud()
-    pcd.points = mesh.vertices
-    pcd.colors = mesh.vertex_colors
-    pcd.normals = mesh.vertex_normals
-
-    return pcd

@@ -4,7 +4,6 @@ from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 from visualization_functions import *
 import copy
-from param import *
 import pickle as pkl
 from help_functions import *
 import statistics 
