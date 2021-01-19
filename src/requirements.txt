@@ -1,0 +1,8 @@
+numpy
+open3d
+matplotlib
+copy
+pickle
+statistics
+scikit-spatial
+regex
