@@ -99,17 +99,17 @@ def refine_registration(source, target, source_fpfh, target_fpfh, voxel_size, re
     return result
 
 def save_transformation(source, target, transformation, name = "", save = False):
-    with open('../stiched/temp'+ name + '.pkl','wb') as f:
+    with open('../stitched/temp'+ name + '.pkl','wb') as f:
         pkl.dump(transformation, f)
 
     #test load
-    with open('../stiched/temp' + name + '.pkl','rb') as f:
+    with open('../stitched/temp' + name + '.pkl','rb') as f:
         x = pkl.load(f)
         # print(x)
 
     # save combined pointcloud as pcd file
     if(save):
-       return save_registration_result(source, target, x,'../stiched/stitch_'+ name + '.pcd' )
+       return save_registration_result(source, target, x,'../stitched/stitch_'+ name + '.pcd' )
 
 
 

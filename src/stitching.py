@@ -62,7 +62,7 @@ for i in range(len(external) - 1):
 processed_source, outlier_index = source.remove_radius_outlier( nb_points=25, radius=0.5)
 
 # save pointcloud
-filename = "../stiched/external.pcd"
+filename = "../stitched/external.pcd"
 o3d.io.write_point_cloud(filename, processed_source)
 
 # print_point_cloud(filename, "external")
@@ -80,7 +80,7 @@ for i in range(len(internal) - 1):
 processed_source, outlier_index = source.remove_radius_outlier( nb_points=25, radius=0.5)
 
 # save pointcloud
-filename = "../stiched/internal.pcd"
+filename = "../stitched/internal.pcd"
 o3d.io.write_point_cloud(filename, processed_source)
 
 # print_point_cloud(filename, "internal")
@@ -99,7 +99,7 @@ for i in range(len(upper) - 1):
 processed_source, outlier_index = source.remove_radius_outlier( nb_points=25, radius=0.5)
 
 # save pointcloud
-filename = "../stiched/upper.pcd"
+filename = "../stitched/upper.pcd"
 o3d.io.write_point_cloud(filename, processed_source)
 
 # print_point_cloud(filename, "upper")
@@ -107,9 +107,9 @@ o3d.io.write_point_cloud(filename, processed_source)
 
 # ========================== Stitching the 3 Sides =======================================
 
-external_pcd = o3d.io.read_point_cloud("../stiched/external.pcd")
-internal_pcd = o3d.io.read_point_cloud("../stiched/internal.pcd")
-upper_pcd    = o3d.io.read_point_cloud("../stiched/upper.pcd")
+external_pcd = o3d.io.read_point_cloud("../stitched/external.pcd")
+internal_pcd = o3d.io.read_point_cloud("../stitched/internal.pcd")
+upper_pcd    = o3d.io.read_point_cloud("../stitched/upper.pcd")
 
 external_upper, transformation = global_and_icp_registration(external_pcd, upper_pcd)
 final, transformation = global_and_icp_registration(external_upper, internal_pcd)
@@ -117,7 +117,7 @@ final, transformation = global_and_icp_registration(external_upper, internal_pcd
 processed_final, outlier_index = final.remove_radius_outlier( nb_points=50, radius=0.5)
 
 # save pointcloud
-filename = "../stiched/final.pcd"
+filename = "../stitched/final.pcd"
 o3d.io.write_point_cloud(filename, processed_final)
 
 
@@ -128,10 +128,10 @@ print("Time elapsed: ", t1, "seconds") # CPU seconds elapsed (floating point)
 
 custom_draw_geometry(cluster_pcd)
 
-filename = "../stiched/final_clustered.pcd"
+filename = "../stitched/final_clustered.pcd"
 o3d.io.write_point_cloud(filename, cluster_pcd)
 
-cluster_pcd = o3d.io.read_point_cloud("../stiched/final_clustered.pcd")
+cluster_pcd = o3d.io.read_point_cloud("../stitched/final_clustered.pcd")
 
 # removed_plane = find_and_delete_planes(cluster_pcd)
 # custom_draw_geometry(removed_plane)
