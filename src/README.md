@@ -1,4 +1,4 @@
-# Snake AI
+# Stitching Point Clouds
 # Current Version 1.0
 ## Dependencies
 There exist three dependencies:
