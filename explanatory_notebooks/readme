@@ -1,5 +1,34 @@
-placeholder for notebook.
+Final notebooks, meant to be explanatory of the process we went through and of various functionalities in open3D with their pros and cons.
 
-suggested convention:
-AUTHOR_notebook_title_v_0_0
+# Current Version 1.0
+
+## DevEnv
+OS: macOS Catalina 10.15.6
+env: Python 3.8 
+
+## 
+
+## Dependencies
+Main:
+> pip install Pillow
+> pip install imageio 
+> pip install cv2-plt-imshow  
+> conda install -c anaconda notebook==6.0.3
+> pip install open3d
+
+Additional:
+> conda install -c conda-forge trimesh
+
+Full list available under "package-list.txt" file.
+
+## Getting started
+Access as any jupyter notebook. 
+There are 6 notebooks numbered, while the others are functions-holders and called when needed.
+
+## Generated Files
+The first time you run 1-Introduction_data_overview, some .txt directory files will be created in order to find data and notebooks folders.
+Note also that there are a lot of temporary files that can be created while handling the visualizations (just by pressing keys such as P or O).
+
+## Core Functions
+Core functions for the stitching process are under "Stitching_clean" and are commented (almost) line by line. 
 
