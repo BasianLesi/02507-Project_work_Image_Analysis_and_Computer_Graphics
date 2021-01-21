@@ -41,7 +41,7 @@ if __name__ == "__main__":
     vis.add_geometry(target)
     # threshold = 0.05
     icp_iteration = 100
-    save_image = False
+    save_image = True
 
     radius_normal = voxel_size * 2
     distance_threshold = voxel_size 
@@ -85,8 +85,8 @@ if __name__ == "__main__":
         # plt.scatter(i, y, color="blue")
         plt.plot(iteration, rmse, color = "red")
         plt.plot(iteration, fitness, color = "blue")
-        plt.xlabel("iteration")
-        plt.ylabel("rmse")
+        plt.xlabel("iterations")
+        plt.ylabel("RMSE - Fitness")
         plt.pause(0.0001)
         # draw_registration_result(source, target, result.transformation)
         if save_image:

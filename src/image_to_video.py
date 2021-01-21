@@ -10,7 +10,7 @@ for filename in glob.glob("images/plot/*.jpg"):
     img_array.append(img)
  
  
-out = cv2.VideoWriter('video/plot.avi',cv2.VideoWriter_fourcc(*'DIVX'), 15, size)
+out = cv2.VideoWriter('videos/plot.avi',cv2.VideoWriter_fourcc(*'DIVX'), 15, size)
  
 for i in range(len(img_array)):
     out.write(img_array[i])
