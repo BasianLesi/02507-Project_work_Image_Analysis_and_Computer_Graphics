@@ -51,7 +51,9 @@ if __name__ == "__main__":
     target.estimate_normals(
         o3d.geometry.KDTreeSearchParamHybrid(radius=radius_normal, max_nn=100))
 
-    for i in range(30):
+#    5 seconds to align the point cloud in the position you want
+#    change the range value for more seconds
+    for i in range(50):
         vis.poll_events()
         vis.update_renderer()
         time.sleep(0.1)
