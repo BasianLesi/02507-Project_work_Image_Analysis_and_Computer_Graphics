@@ -91,7 +91,7 @@ if __name__ == "__main__":
         # draw_registration_result(source, target, result.transformation)
         if save_image:
             plt.savefig("images/plot/plot_%04d.jpg" % i)
-            # vis.capture_screen_image("images/temp_%04d.jpg" % i)
+            vis.capture_screen_image("images/temp_%04d.jpg" % i)
     vis.destroy_window()
 
     
